@@ -1,267 +1,1050 @@
-# TrainLens V1.3
+# TrainLens
 
-A real-time training dashboard for computer vision and deep learning projects with automatic experiment tracking and dataset inspection.
+TrainLens 是一个面向本地计算机视觉训练任务的可视化 Dashboard。
 
-## 🚀 Quick Start
+它不负责实现训练算法，而是负责启动训练脚本、实时读取训练指标、显示训练曲线、保存实验记录，并检查 ImageFolder 格式数据集。
 
-1. **Double-click `start_trainlens.bat`** to launch the dashboard
-2. The dashboard will open in your browser at `http://localhost:8501`
-3. Configure your training parameters in the sidebar
-4. Click **Start Training** to begin
-5. Each training run is automatically saved as exp_001, exp_002, etc.
+TrainLens is a local visual dashboard for computer vision training tasks.  
+It does not implement training algorithms. Instead, it launches your training script, monitors metrics, visualizes curves, saves experiment records, and inspects ImageFolder-style datasets.
 
-## 📋 Requirements
+---
 
-- Python 3.8+
-- Dependencies (auto-installed on first run):
-  - streamlit >= 1.28.0
-  - pandas >= 2.0.0
-  - plotly >= 5.17.0
-  - psutil >= 5.9.0
-  - numpy < 2.0.0
+# 中文说明
 
-## 🎯 Features
+## 1. 项目简介
 
-### V1.3 - Dataset Inspector
-- **Dataset Statistics**: Automatic scanning of ImageFolder datasets
-- **Class Distribution**: Visual charts showing train/val distribution per class
-- **Imbalance Detection**: Calculate and display class imbalance ratio
-- **Image Preview**: Random sampling of 8 training images with class labels
-- **Real-time Refresh**: Update statistics without restarting dashboard
+TrainLens 的核心定位是：
 
-### V1.2 - Training Script Integration
-- **Example CV Script**: Complete PyTorch training script template
-- **Protocol Documentation**: Detailed CLI and JSONL format specification
-- **Dual Mode Support**: Works with or without PyTorch installed
-- **Easy Integration**: Simple guide for connecting custom training scripts
+> 训练算法由你的 `train.py` 负责。  
+> TrainLens 负责启动它、观察它、记录它。
 
-### V1.1 - Experiment Tracking
-- **Automatic Experiment IDs**: Each training run gets a unique ID (exp_001, exp_002...)
-- **Experiment History**: View all past experiments with metrics comparison
-- **Config Archiving**: Every experiment saves its configuration
-- **Training Logs**: Full stdout/stderr saved to train.log
-- **Summary Reports**: Automatic generation of experiment summaries
+它可以帮助你：
 
-### Core Functionality
-- **Real-time Monitoring**: Live updates of training metrics (loss, accuracy, progress)
-- **Progress Wheel**: Circular gauge showing 0-100% training progress
-- **Interactive Charts**: Plotly-powered loss and accuracy curves
-- **Process Management**: Start/Stop training with one click
-- **Configuration Persistence**: Automatically saves your last training configuration
+- 启动本地训练脚本
+- 实时读取 `metrics.jsonl`
+- 显示训练进度、Accuracy 曲线、Loss 曲线
+- 自动保存每次实验记录
+- 查看历史实验结果
+- 检查 ImageFolder 格式数据集
+- 更直观地观察计算机视觉训练过程
 
-### Dashboard Layout
-- **Current Training Tab**: Real-time monitoring with progress wheel and curves
-- **Experiment History Tab**: Compare all experiments, view details and logs
-- **Dataset Inspector Tab**: Check dataset quality, class distribution, and preview images
-- **Sidebar**: Training configuration with live experiment info
-- **Metrics Cards**: Current/Best Acc, Current/Best Loss
-- **Charts**: Loss curves (Train/Val/Best) and Accuracy curves
+---
 
-## 📁 Project Structure
+## 2. 项目结构
 
-```
+```text
 TrainLens/
-├── start_trainlens.bat          # One-click launcher
-├── venv/                        # Virtual environment (auto-created)
-├── trainlens_app/
-│   ├── app.py                   # Streamlit dashboard V1.1
-│   └── requirements.txt         # Python dependencies
-├── scripts/
-│   └── mock_train.py            # Example training script
-├── runs/
-│   ├── current/
-│   │   └── metrics.jsonl        # Real-time metrics
-│   ├── exp_001/
-│   │   ├── config.json          # Experiment config
-│   │   ├── metrics.jsonl        # Archived metrics
-│   │   ├── train.log            # Training output
-│   │   └── summary.json         # Results summary
-│   ├── exp_002/
-│   └── exp_003/
-└── trainlens_config.json        # Last used configuration
+├─ setup_trainlens.bat          # 第一次安装环境用
+├─ start_trainlens.bat          # 启动 TrainLens 用
+├─ trainlens_app/
+│  ├─ app.py                    # Dashboard 主程序
+│  └─ requirements.txt          # Python 依赖
+├─ scripts/
+│  └─ mock_train.py             # 默认模拟训练脚本
+├─ examples/
+│  └─ example_cv_train.py       # 训练脚本接入示例
+├─ docs/
+│  ├─ TRAIN_SCRIPT_PROTOCOL.md  # 训练脚本协议说明
+│  └─ DATASET_INSPECTOR.md      # 数据集检查说明
+├─ dataset/
+│  ├─ README_dataset_format.txt # 数据集格式说明
+│  ├─ train/                    # 示例训练集
+│  └─ val/                      # 示例验证集
+├─ runs/                        # 实验记录目录
+├─ README.md
+└─ RELEASE_CHECKLIST.md
 ```
 
-## 🔧 接入自己的训练脚本
+---
 
-### 快速开始
+## 3. 第一次使用
 
-TrainLens 使用简单的 **CLI + JSONL** 协议与训练脚本通信。
+### 第一步：安装 Python
 
-**示例脚本：**
-- `scripts/mock_train.py` - 轻量级模拟脚本
-- `examples/example_cv_train.py` - 完整的 PyTorch CV 训练脚本（支持无 torch 运行）
+推荐使用：
 
-### 必需的命令行参数
+```text
+Python 3.10 或 Python 3.11
+```
 
-你的训练脚本必须支持这 7 个参数：
+安装 Python 时请勾选：
+
+```text
+Add Python to PATH
+```
+
+如果没有安装 Python，可以从官网下载：
+
+```text
+https://www.python.org/downloads/
+```
+
+---
+
+### 第二步：安装 TrainLens 环境
+
+解压项目后，双击运行：
+
+```text
+setup_trainlens.bat
+```
+
+它会自动完成：
+
+- 检查 Python
+- 创建 `.venv` 虚拟环境
+- 安装 Streamlit、Plotly、Pandas、NumPy、Pillow 等依赖
+
+安装完成后会看到类似提示：
+
+```text
+TrainLens setup finished.
+You can now run start_trainlens.bat
+```
+
+---
+
+## 4. 启动 TrainLens
+
+以后每次使用，双击运行：
+
+```text
+start_trainlens.bat
+```
+
+正常情况下浏览器会自动打开：
+
+```text
+http://localhost:8501
+```
+
+如果浏览器没有自动打开，可以手动复制该地址到浏览器。
+
+---
+
+## 5. 快速测试
+
+第一次打开 Dashboard 后，可以直接使用默认模拟训练脚本测试。
+
+侧边栏保持默认设置：
+
+```text
+Training Script: scripts/mock_train.py
+Train Directory: ./dataset/train
+Validation Directory: ./dataset/val
+Epochs: 5
+Learning Rate: 0.001
+Batch Size: 16
+Device: auto
+```
+
+点击：
+
+```text
+Start Training
+```
+
+正常现象：
+
+- 状态变为 Running
+- 进度轮盘开始增长
+- Accuracy / Loss 曲线开始更新
+- 训练结束后状态变为 Finished
+- `runs/exp_001`、`runs/exp_002` 等实验目录自动生成
+
+---
+
+## 6. 主要功能
+
+### 6.1 Training Dashboard
+
+显示当前训练状态，包括：
+
+- 当前 Epoch
+- 训练进度
+- 当前 Accuracy
+- 最佳 Accuracy
+- 当前 Loss
+- 最佳 Loss
+- Accuracy 曲线
+- Loss 曲线
+- 训练日志
+- 最近 metrics 数据
+
+---
+
+### 6.2 Experiment History
+
+每次训练都会自动保存一个实验目录，例如：
+
+```text
+runs/exp_001
+runs/exp_002
+runs/exp_003
+```
+
+每个实验目录通常包含：
+
+```text
+config.json      # 本次训练配置
+metrics.jsonl    # 每个 epoch 的训练指标
+summary.json     # 训练结果摘要
+train.log        # 训练输出日志
+```
+
+---
+
+### 6.3 Dataset Inspector
+
+用于检查 ImageFolder 格式的数据集。
+
+支持格式：
+
+```text
+dataset/
+├─ train/
+│  ├─ cat/
+│  │  ├─ 001.jpg
+│  │  └─ 002.jpg
+│  └─ dog/
+│     ├─ 001.jpg
+│     └─ 002.jpg
+└─ val/
+   ├─ cat/
+   └─ dog/
+```
+
+Dataset Inspector 可以显示：
+
+- 训练集图片数量
+- 验证集图片数量
+- 类别数量
+- 每个类别的图片数量
+- 类别分布柱状图
+- 随机图片预览
+
+支持图片格式：
+
+```text
+.jpg
+.jpeg
+.png
+.bmp
+.webp
+```
+
+---
+
+## 7. 接入自己的训练脚本
+
+TrainLens 不限制你使用什么模型或框架。
+
+你可以使用：
+
+- PyTorch
+- TensorFlow
+- PaddlePaddle
+- YOLO 项目
+- 自己写的训练代码
+- 分类、检测、分割项目
+
+但你的训练脚本需要遵守 TrainLens 的 CLI 参数协议和 JSONL 日志协议。
+
+---
+
+### 7.1 必须支持的命令行参数
+
+你的训练脚本至少需要支持：
+
+```text
+--train     训练集路径
+--val       验证集路径
+--epochs    训练轮数
+--lr        学习率
+--batch     Batch Size
+--device    运行设备
+--log       metrics.jsonl 输出路径
+```
+
+TrainLens 启动训练时大概会执行：
 
 ```bash
-python train.py \
-  --train ./dataset/train \
-  --val ./dataset/val \
-  --epochs 20 \
-  --lr 0.001 \
-  --batch 16 \
-  --device auto \
-  --log runs/current/metrics.jsonl
+python train.py --train ./dataset/train --val ./dataset/val --epochs 20 --lr 0.001 --batch 16 --device auto --log runs/current/metrics.jsonl
 ```
 
-### 必需的 JSONL 输出
+---
 
-每个 epoch 后写入一行 JSON：
+### 7.2 必须输出 metrics.jsonl
+
+训练脚本需要每个 epoch 向 `--log` 指定的文件写入一行 JSON。
+
+示例：
+
+```json
+{"epoch":1,"total_epoch":20,"progress":5.0,"train_loss":0.823,"val_loss":0.756,"acc":0.612,"best_acc":0.612,"best_loss":0.756,"lr":0.001,"batch":16,"device":"auto"}
+```
+
+每一行都是一个 JSON 对象，这种格式叫 JSONL。
+
+---
+
+### 7.3 字段说明
+
+| 字段 | 含义 |
+|---|---|
+| epoch | 当前 epoch |
+| total_epoch | 总 epoch 数 |
+| progress | 训练进度，范围 0 到 100 |
+| train_loss | 训练集 loss |
+| val_loss | 验证集 loss |
+| acc | 当前验证集准确率，推荐范围 0 到 1 |
+| best_acc | 到目前为止最高准确率 |
+| best_loss | 到目前为止最低验证 loss |
+| lr | 当前学习率 |
+| batch | Batch Size |
+| device | 当前运行设备，例如 auto、cpu、cuda:0 |
+
+注意：
+
+```text
+acc 推荐使用 0 到 1，例如 0.92 表示 92%。
+progress 推荐使用 0 到 100，例如 50.0 表示 50%。
+```
+
+---
+
+### 7.4 写入 metrics 示例
 
 ```python
 import json
+from pathlib import Path
 
 def write_metric(log_path, data):
-    with open(log_path, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(data) + '\n')
-        f.flush()  # 重要：立即刷新
+    log_path = Path(log_path)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
 
-# 训练循环
-for epoch in range(1, args.epochs + 1):
-    train_loss = train_one_epoch(...)
-    val_loss, val_acc = validate(...)
-    
-    metrics = {
-        'epoch': epoch,
-        'total_epoch': args.epochs,
-        'progress': round(epoch / args.epochs * 100, 2),  # 0-100
-        'train_loss': round(train_loss, 6),
-        'val_loss': round(val_loss, 6),
-        'acc': round(val_acc, 6),  # 0-1
-        'best_acc': round(best_acc, 6),
-        'best_loss': round(best_loss, 6),
-    }
-    
-    write_metric(args.log, metrics)
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False) + "\n")
+        f.flush()
 ```
 
-### 字段规范
+训练循环中写入：
 
-| 字段 | 类型 | 范围 | 说明 |
-|------|------|------|------|
-| `epoch` | int | 1+ | 当前 epoch |
-| `total_epoch` | int | 1+ | 总 epoch 数 |
-| `progress` | float | 0-100 | 训练进度百分比 |
-| `train_loss` | float | ≥0 | 训练损失 |
-| `val_loss` | float | ≥0 | 验证损失 |
-| `acc` | float | 0-1 | 验证准确率 |
-| `best_acc` | float | 0-1 | 历史最佳准确率 |
-| `best_loss` | float | ≥0 | 历史最佳损失 |
+```python
+metric = {
+    "epoch": epoch,
+    "total_epoch": epochs,
+    "progress": round(epoch / epochs * 100, 2),
+    "train_loss": round(train_loss, 6),
+    "val_loss": round(val_loss, 6),
+    "acc": round(acc, 6),
+    "best_acc": round(best_acc, 6),
+    "best_loss": round(best_loss, 6),
+    "lr": lr,
+    "batch": batch,
+    "device": device
+}
 
-### 完整协议文档
+write_metric(args.log, metric)
+```
 
-详见 **[docs/TRAIN_SCRIPT_PROTOCOL.md](docs/TRAIN_SCRIPT_PROTOCOL.md)**，包括：
-- CLI 参数详细说明
-- JSONL 格式要求
-- 常见错误及解决方案
-- 最小接入代码
-- 框架兼容性说明
+完整协议请查看：
 
-## 🎨 Dashboard Features
+```text
+docs/TRAIN_SCRIPT_PROTOCOL.md
+```
 
-### Configuration Panel
-- **Script Path**: Path to your training script
-- **Data Directories**: Training and validation data locations
-- **Hyperparameters**: Epochs, learning rate, batch size, device selection
-- **Auto-save**: Last configuration is saved to `trainlens_config.json`
+示例脚本请查看：
 
-### Real-time Updates
-- Dashboard auto-refreshes every second during training
-- No manual refresh needed
-- Process status indicator shows running/idle state
+```text
+examples/example_cv_train.py
+```
 
-### Process Control
-- **Start Training**: Launches your script with configured parameters
-- **Stop Training**: Gracefully terminates the training process
-- Process PID display for advanced monitoring
+---
 
-## 🛠️ Manual Installation
+## 8. 常见问题
 
-If you prefer not to use the batch file:
+### 8.1 双击 setup_trainlens.bat 后提示找不到 Python
+
+原因：
+
+- 没有安装 Python
+- 安装 Python 时没有勾选 Add Python to PATH
+
+解决：
+
+重新安装 Python 3.10 或 3.11，并勾选 Add Python to PATH。
+
+---
+
+### 8.2 setup_trainlens.bat 安装依赖失败
+
+可能原因：
+
+- 网络不好
+- pip 下载失败
+- Python 版本不合适
+- 杀毒软件拦截
+
+解决：
+
+- 换一个网络
+- 重新运行 `setup_trainlens.bat`
+- 确认 Python 版本为 3.10 或 3.11
+
+---
+
+### 8.3 start_trainlens.bat 提示没有 .venv
+
+原因：
+
+还没有运行初始化脚本。
+
+解决：
+
+先双击运行：
+
+```text
+setup_trainlens.bat
+```
+
+---
+
+### 8.4 浏览器打不开 http://localhost:8501
+
+可能原因：
+
+- Streamlit 没启动成功
+- 8501 端口被占用
+- bat 窗口里有报错
+
+解决：
+
+- 查看黑色命令行窗口中的报错
+- 关闭其他 Streamlit 程序
+- 重新运行 `start_trainlens.bat`
+
+---
+
+### 8.5 点击 Start Training 后没有曲线
+
+请检查：
+
+- 训练脚本路径是否正确
+- 训练脚本是否支持 `--log`
+- 是否生成了 `metrics.jsonl`
+- `metrics.jsonl` 每一行是否都是合法 JSON
+- 写入文件后是否执行了 `flush`
+
+---
+
+## 9. 如何清空实验记录
+
+实验记录保存在：
+
+```text
+runs/
+```
+
+如果只是测试，可以删除：
+
+```text
+runs/exp_001
+runs/exp_002
+runs/current
+```
+
+Git Bash：
 
 ```bash
-# Install dependencies
-pip install -r trainlens_app/requirements.txt
-
-# Start dashboard
-streamlit run trainlens_app/app.py
+rm -rf runs
+mkdir runs
+touch runs/.gitkeep
 ```
 
-## 📝 Example Usage
+Windows CMD：
 
-### Basic Training Workflow
+```bat
+rmdir /s /q runs
+mkdir runs
+type nul > runs\.gitkeep
+```
 
-1. Launch dashboard: `start_trainlens.bat`
-2. Configure in sidebar:
-   - Script: `scripts/mock_train.py`
-   - Train dir: `./dataset/train`
-   - Val dir: `./dataset/val`
-   - Epochs: `20`
-   - Learning rate: `0.001`
-   - Batch size: `16`
-3. **(Optional) Check your dataset first:**
-   - Click **Dataset Inspector** tab
-   - Review class distribution and imbalance ratio
-   - Preview random training images
-   - Verify dataset quality before training
-4. Click **Start Training**
-5. Watch real-time metrics and charts update
+PowerShell：
 
-### Dataset Inspector Usage
+```powershell
+Remove-Item -Recurse -Force .\runs
+New-Item -ItemType Directory .\runs
+New-Item -ItemType File .\runs\.gitkeep
+```
 
-1. Configure dataset paths in sidebar (Train Directory, Validation Directory)
-2. Navigate to **🔍 Dataset Inspector** tab
-3. View dataset statistics:
-   - Total images (train/val)
-   - Number of classes
-   - Class imbalance ratio
-4. Check class distribution table and chart
-5. Preview random training images
-6. Click **🔄 Refresh Dataset Stats** to rescan or get new samples
+---
 
-**详细文档:** [docs/DATASET_INSPECTOR.md](docs/DATASET_INSPECTOR.md)
+## 10. 当前限制
 
-## 🔍 Troubleshooting
+当前版本限制：
 
-### Dashboard won't start
-- Check Python is installed: `python --version`
-- Verify you're in the TrainLens directory
-- Try manual installation steps above
+- 暂不支持目标检测 bbox 可视化
+- 暂不支持分割 mask 可视化
+- 暂不内置 YOLO、ResNet、UNet 等算法
+- 暂不支持云端同步
+- 暂不支持多人协作
+- 暂不支持数据库
+- 暂未打包成 exe
+- 用户训练脚本需要遵守 CLI + JSONL 协议
 
-### Training won't start
-- Verify your script path exists
-- Check that data directories exist
-- Review terminal output for Python errors
+---
 
-### Metrics not showing
-- Ensure your script writes to `metrics.jsonl`
-- Check JSONL format matches expected schema
-- Verify file permissions
+## 11. 推荐使用流程
 
-### Process won't stop
-- Use Task Manager to manually kill the process
-- Check PID shown in dashboard status
+普通用户：
 
-### Dataset Inspector issues
-- **Classes = 0**: Check if dataset follows ImageFolder format (dataset/train/class_name/*.jpg)
-- **Images not loading**: Verify image file permissions and formats (jpg, png, bmp, gif supported)
-- **High imbalance ratio**: Consider data augmentation or weighted sampling in training script
-- **Path not found**: Use relative paths from TrainLens root or absolute paths
+```text
+1. 解压 TrainLens
+2. 双击 setup_trainlens.bat
+3. 双击 start_trainlens.bat
+4. 先用 scripts/mock_train.py 测试
+5. 再接入自己的 train.py
+6. 用 Dataset Inspector 检查数据集
+7. 用 Experiment History 查看历史实验
+```
 
-## 🚧 VS Code Extension (Coming Soon)
+开发者：
 
-A simplified VS Code extension will be added as a launcher:
-- Command: `TrainLens: Open Dashboard`
-- Opens browser to dashboard automatically
-- No complex Webview or embedded UI
-- Pure launcher functionality
+```text
+1. 修改 trainlens_app/app.py
+2. 修改 examples/example_cv_train.py
+3. 修改 docs 文档
+4. 用 start_trainlens.bat 测试
+5. 发布前清理 .venv、runs、__pycache__
+```
 
-## 📄 License
+---
 
-MIT License - feel free to modify and distribute.
+# English Guide
 
-## 🤝 Contributing
+## 1. Introduction
 
-This is a local development tool. Modify `trainlens_app/app.py` to customize the dashboard for your needs.
+TrainLens is a local visual dashboard for computer vision training tasks.
+
+It does not implement training algorithms. Instead, it helps you launch, monitor, record, and inspect your training process.
+
+In simple terms:
+
+> Your `train.py` is responsible for model training.  
+> TrainLens is responsible for launching, monitoring, and recording it.
+
+TrainLens helps you:
+
+- Start local training scripts
+- Read `metrics.jsonl` in real time
+- Display training progress, accuracy curves, and loss curves
+- Save experiment records automatically
+- View experiment history
+- Inspect ImageFolder-style datasets
+- Observe computer vision training more clearly
+
+---
+
+## 2. Project Structure
+
+```text
+TrainLens/
+├─ setup_trainlens.bat          # First-time setup
+├─ start_trainlens.bat          # Start TrainLens
+├─ trainlens_app/
+│  ├─ app.py                    # Main Dashboard application
+│  └─ requirements.txt          # Python dependencies
+├─ scripts/
+│  └─ mock_train.py             # Default mock training script
+├─ examples/
+│  └─ example_cv_train.py       # Example training script
+├─ docs/
+│  ├─ TRAIN_SCRIPT_PROTOCOL.md  # Training script protocol
+│  └─ DATASET_INSPECTOR.md      # Dataset Inspector guide
+├─ dataset/
+│  ├─ README_dataset_format.txt # Dataset format guide
+│  ├─ train/                    # Example training set
+│  └─ val/                      # Example validation set
+├─ runs/                        # Experiment records
+├─ README.md
+└─ RELEASE_CHECKLIST.md
+```
+
+---
+
+## 3. First-Time Setup
+
+### Step 1: Install Python
+
+Recommended version:
+
+```text
+Python 3.10 or Python 3.11
+```
+
+When installing Python, make sure to check:
+
+```text
+Add Python to PATH
+```
+
+Download Python from:
+
+```text
+https://www.python.org/downloads/
+```
+
+---
+
+### Step 2: Install TrainLens Environment
+
+After extracting the project folder, double-click:
+
+```text
+setup_trainlens.bat
+```
+
+It will automatically:
+
+- Check Python
+- Create the `.venv` virtual environment
+- Install dependencies such as Streamlit, Plotly, Pandas, NumPy, and Pillow
+
+When setup is complete, you will see:
+
+```text
+TrainLens setup finished.
+You can now run start_trainlens.bat
+```
+
+---
+
+## 4. Start TrainLens
+
+After setup, double-click:
+
+```text
+start_trainlens.bat
+```
+
+The browser should open automatically:
+
+```text
+http://localhost:8501
+```
+
+If the browser does not open, copy the address manually into your browser.
+
+---
+
+## 5. Quick Test
+
+After opening the Dashboard for the first time, test it with the default mock training script.
+
+Keep the sidebar settings as default:
+
+```text
+Training Script: scripts/mock_train.py
+Train Directory: ./dataset/train
+Validation Directory: ./dataset/val
+Epochs: 5
+Learning Rate: 0.001
+Batch Size: 16
+Device: auto
+```
+
+Click:
+
+```text
+Start Training
+```
+
+Expected behavior:
+
+- Status changes to Running
+- Progress gauge starts increasing
+- Accuracy and Loss curves start updating
+- Status becomes Finished after training ends
+- Experiment folders such as `runs/exp_001` are created automatically
+
+---
+
+## 6. Main Features
+
+### 6.1 Training Dashboard
+
+Displays:
+
+- Current epoch
+- Training progress
+- Current accuracy
+- Best accuracy
+- Current loss
+- Best loss
+- Accuracy curve
+- Loss curve
+- Training logs
+- Recent metrics
+
+---
+
+### 6.2 Experiment History
+
+Each training run is saved as an experiment folder:
+
+```text
+runs/exp_001
+runs/exp_002
+runs/exp_003
+```
+
+Each experiment folder usually contains:
+
+```text
+config.json      # Training configuration
+metrics.jsonl    # Metrics for each epoch
+summary.json     # Training summary
+train.log        # Training output log
+```
+
+---
+
+### 6.3 Dataset Inspector
+
+Used to inspect ImageFolder-style datasets.
+
+Supported structure:
+
+```text
+dataset/
+├─ train/
+│  ├─ cat/
+│  │  ├─ 001.jpg
+│  │  └─ 002.jpg
+│  └─ dog/
+│     ├─ 001.jpg
+│     └─ 002.jpg
+└─ val/
+   ├─ cat/
+   └─ dog/
+```
+
+Dataset Inspector shows:
+
+- Number of training images
+- Number of validation images
+- Number of classes
+- Number of images per class
+- Class distribution bar chart
+- Random image previews
+
+Supported image formats:
+
+```text
+.jpg
+.jpeg
+.png
+.bmp
+.webp
+```
+
+---
+
+## 7. Using Your Own Training Script
+
+TrainLens does not restrict your model or framework.
+
+You may use:
+
+- PyTorch
+- TensorFlow
+- PaddlePaddle
+- YOLO projects
+- Custom training code
+- Classification, detection, or segmentation projects
+
+However, your training script must follow the TrainLens CLI and JSONL logging protocol.
+
+---
+
+### 7.1 Required Command-Line Arguments
+
+Your training script should support at least:
+
+```text
+--train     Training dataset path
+--val       Validation dataset path
+--epochs    Number of epochs
+--lr        Learning rate
+--batch     Batch size
+--device    Running device
+--log       Output path for metrics.jsonl
+```
+
+TrainLens will run a command similar to:
+
+```bash
+python train.py --train ./dataset/train --val ./dataset/val --epochs 20 --lr 0.001 --batch 16 --device auto --log runs/current/metrics.jsonl
+```
+
+---
+
+### 7.2 Required metrics.jsonl Output
+
+Your training script should write one JSON line to the file specified by `--log` after each epoch.
+
+Example:
+
+```json
+{"epoch":1,"total_epoch":20,"progress":5.0,"train_loss":0.823,"val_loss":0.756,"acc":0.612,"best_acc":0.612,"best_loss":0.756,"lr":0.001,"batch":16,"device":"auto"}
+```
+
+Each line must be a valid JSON object. This format is called JSONL.
+
+---
+
+### 7.3 Field Definitions
+
+| Field | Description |
+|---|---|
+| epoch | Current epoch |
+| total_epoch | Total number of epochs |
+| progress | Training progress, from 0 to 100 |
+| train_loss | Training loss |
+| val_loss | Validation loss |
+| acc | Current validation accuracy, recommended range 0 to 1 |
+| best_acc | Best accuracy so far |
+| best_loss | Best validation loss so far |
+| lr | Current learning rate |
+| batch | Batch size |
+| device | Current running device, such as auto, cpu, cuda:0 |
+
+Note:
+
+```text
+acc should be between 0 and 1. For example, 0.92 means 92%.
+progress should be between 0 and 100. For example, 50.0 means 50%.
+```
+
+---
+
+### 7.4 Example Metric Writing Code
+
+```python
+import json
+from pathlib import Path
+
+def write_metric(log_path, data):
+    log_path = Path(log_path)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False) + "\n")
+        f.flush()
+```
+
+Inside your training loop:
+
+```python
+metric = {
+    "epoch": epoch,
+    "total_epoch": epochs,
+    "progress": round(epoch / epochs * 100, 2),
+    "train_loss": round(train_loss, 6),
+    "val_loss": round(val_loss, 6),
+    "acc": round(acc, 6),
+    "best_acc": round(best_acc, 6),
+    "best_loss": round(best_loss, 6),
+    "lr": lr,
+    "batch": batch,
+    "device": device
+}
+
+write_metric(args.log, metric)
+```
+
+For the complete protocol, see:
+
+```text
+docs/TRAIN_SCRIPT_PROTOCOL.md
+```
+
+For an example script, see:
+
+```text
+examples/example_cv_train.py
+```
+
+---
+
+## 8. FAQ
+
+### 8.1 setup_trainlens.bat says Python was not found
+
+Reason:
+
+- Python is not installed
+- Add Python to PATH was not checked during installation
+
+Solution:
+
+Install Python 3.10 or 3.11 and check Add Python to PATH.
+
+---
+
+### 8.2 setup_trainlens.bat fails to install dependencies
+
+Possible reasons:
+
+- Poor network connection
+- pip download failure
+- Incompatible Python version
+- Antivirus software blocking installation
+
+Solutions:
+
+- Try another network
+- Run `setup_trainlens.bat` again
+- Make sure Python version is 3.10 or 3.11
+
+---
+
+### 8.3 start_trainlens.bat says .venv was not found
+
+Reason:
+
+The setup script has not been run yet.
+
+Solution:
+
+Run:
+
+```text
+setup_trainlens.bat
+```
+
+---
+
+### 8.4 Browser cannot open http://localhost:8501
+
+Possible reasons:
+
+- Streamlit did not start successfully
+- Port 8501 is already in use
+- There is an error in the bat window
+
+Solutions:
+
+- Check the error message in the command window
+- Close other Streamlit programs
+- Run `start_trainlens.bat` again
+
+---
+
+### 8.5 No curves appear after clicking Start Training
+
+Check:
+
+- Whether the training script path is correct
+- Whether the training script supports `--log`
+- Whether `metrics.jsonl` is generated
+- Whether every line in `metrics.jsonl` is valid JSON
+- Whether the file is flushed after each write
+
+---
+
+## 9. Clear Experiment Records
+
+Experiment records are stored in:
+
+```text
+runs/
+```
+
+For testing, you can delete:
+
+```text
+runs/exp_001
+runs/exp_002
+runs/current
+```
+
+Git Bash:
+
+```bash
+rm -rf runs
+mkdir runs
+touch runs/.gitkeep
+```
+
+Windows CMD:
+
+```bat
+rmdir /s /q runs
+mkdir runs
+type nul > runs\.gitkeep
+```
+
+PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force .\runs
+New-Item -ItemType Directory .\runs
+New-Item -ItemType File .\runs\.gitkeep
+```
+
+---
+
+## 10. Current Limitations
+
+Current limitations:
+
+- Object detection bbox visualization is not supported yet
+- Segmentation mask visualization is not supported yet
+- YOLO, ResNet, UNet, and other algorithms are not built in
+- Cloud sync is not supported
+- Multi-user collaboration is not supported
+- Database storage is not supported
+- EXE packaging is not available yet
+- User training scripts must follow the CLI + JSONL protocol
+
+---
+
+## 11. Recommended Workflow
+
+For normal users:
+
+```text
+1. Extract TrainLens
+2. Double-click setup_trainlens.bat
+3. Double-click start_trainlens.bat
+4. Test with scripts/mock_train.py first
+5. Connect your own train.py
+6. Use Dataset Inspector to check your dataset
+7. Use Experiment History to review training runs
+```
+
+For developers:
+
+```text
+1. Modify trainlens_app/app.py
+2. Modify examples/example_cv_train.py
+3. Modify docs if needed
+4. Test with start_trainlens.bat
+5. Clean .venv, runs, and __pycache__ before release
+```
+
+---
+
+## 12. Summary
+
+TrainLens does not train models for you.
+
+It makes your training process more visible:
+
+- Launch
+- Monitor
+- Record
+- Compare
+- Inspect datasets
