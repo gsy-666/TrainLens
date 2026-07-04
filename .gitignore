@@ -1,7 +1,36 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js / VS Code extension
 node_modules/
 out/
-runs/
-venv/
-__pycache__/
-.vscode-test/
+dist/
+*.vsix
+
+# Training runs – keep .gitkeep, ignore all run data
+runs/*
+!runs/.gitkeep
+
+# Config with local paths
+trainlens_config.json
+test_metrics.jsonl
 *.log
+
+# IDE / editor
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+
+# Release test packaging
+TrainLens_Release_Test/

@@ -1,9 +1,0 @@
-{
-  "script_path": "scripts/mock_train.py",
-  "train_dir": "./dataset/train",
-  "val_dir": "./dataset/val",
-  "epochs": 20,
-  "lr": 0.001,
-  "batch_size": 16,
-  "device": "auto"
-}
