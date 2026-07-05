@@ -9,33 +9,115 @@ It does not implement training algorithms. Instead, it launches your training sc
 
 ---
 
-# 中文说明
+TrainLens 目前支持两种运行模式：
 
-## 1. 项目简介
+1. **Portable EXE 模式**：推荐普通用户使用。
+2. **源码 BAT 模式**：推荐开发者使用。
 
-TrainLens 的核心定位是：
+TrainLens currently supports two running modes:
 
-> 训练算法由你的 `train.py` 负责。  
-> TrainLens 负责启动它、观察它、记录它。
-
-它可以帮助你：
-
-- 启动本地训练脚本
-- 实时读取 `metrics.jsonl`
-- 显示训练进度、Accuracy 曲线、Loss 曲线
-- 自动保存每次实验记录
-- 查看历史实验结果
-- 检查 ImageFolder 格式数据集
-- 更直观地观察计算机视觉训练过程
+1. **Portable EXE Mode**: recommended for normal users.
+2. **Source BAT Mode**: recommended for developers.
 
 ---
 
-## 2. 项目结构
+## Quick Start / 快速开始
+
+### 方式一：Portable EXE 模式（推荐普通用户）
+
+普通用户推荐使用 Portable EXE 模式。你只需要把 `TrainLens` 文件夹放到自己的计算机视觉项目根目录，然后双击 `TrainLens.exe` 即可。
+
+推荐项目结构：
+
+```text
+MyCVProject/                      # 你的 CV 项目根目录
+├─ .venv/                         # 你的 Python 训练环境
+│  └─ Scripts/
+│     └─ python.exe
+├─ train.py                       # 你的训练脚本
+├─ dataset/
+│  ├─ train/
+│  │  ├─ class_1/
+│  │  └─ class_2/
+│  └─ val/
+│     ├─ class_1/
+│     └─ class_2/
+├─ TrainLens/                     # TrainLens 工具目录
+│  ├─ TrainLens.exe              # 主程序（双击启动）
+│  └─ _internal/                 # 依赖库
+└─ runs/                         # 训练记录（自动生成）
+```
+
+**使用步骤：**
+
+1. 从 Release 页面下载 `TrainLens_Portable.zip`
+2. 解压，将 `TrainLens` 文件夹复制到你的项目根目录（与 `train.py` 同级）
+3. 双击 `TrainLens/TrainLens.exe`
+4. 浏览器自动打开 `http://localhost:8501`
+
+**自动检测：**
+
+TrainLens.exe 启动后会自动检测：
+
+- `MyCVProject/train.py` → 训练脚本
+- `MyCVProject/dataset/train` 和 `dataset/val` → 数据集
+- `MyCVProject/.venv/Scripts/python.exe` → 训练 Python 环境
+- 训练记录自动保存到 `MyCVProject/runs/exp_001`、`exp_002` ...
+
+**优点：**
+
+- 无需安装 Python 即可启动 Dashboard
+- 自动检测项目中的 Python 训练环境（`.venv`、`venv`、`env`）
+- 可同时用于多个项目（每个项目复制一份 `TrainLens` 文件夹）
+- 训练记录保存在各自项目目录，互不干扰
+
+**Python 环境说明：**
+
+TrainLens.exe 本身是独立运行的，不需要用户安装 Python。但运行 `train.py` 时需要项目中有可用的 Python 环境。TrainLens 会按以下顺序自动检测：
+
+1. `MyCVProject/.venv/Scripts/python.exe`
+2. `MyCVProject/venv/Scripts/python.exe`
+3. `MyCVProject/env/Scripts/python.exe`
+4. 系统 PATH 中的 `python`
+
+如果自动检测失败，可以在 Dashboard 的 Advanced Settings 中手动指定 Python 路径。
+
+---
+
+### 方式二：源码 BAT 模式（推荐开发者）
+
+适合需要修改 Dashboard 源码、调试、或参与开发的用户。
+
+**前置条件：** 需要安装 Python 3.10 或 3.11，并勾选 "Add Python to PATH"。
+
+**第一次安装：**
+
+```bash
+双击 setup_trainlens.bat
+```
+
+脚本会自动创建 `.venv` 虚拟环境并安装 Streamlit、Plotly、Pandas、NumPy、Pillow 等依赖。
+
+**以后启动：**
+
+```bash
+双击 start_trainlens.bat
+```
+
+浏览器自动打开 `http://localhost:8501`。
+
+**快速测试（源码模式）：**
+
+直接使用默认的 `scripts/mock_train.py` 模拟训练脚本进行测试。
+
+---
+
+## 项目结构
 
 ```text
 TrainLens/
-├─ setup_trainlens.bat          # 第一次安装环境用
-├─ start_trainlens.bat          # 启动 TrainLens 用
+├─ setup_trainlens.bat          # 源码模式：首次安装环境
+├─ start_trainlens.bat          # 源码模式：启动 TrainLens
 ├─ trainlens_app/
 │  ├─ app.py                    # Dashboard 主程序
 │  └─ requirements.txt          # Python 依赖
@@ -57,106 +139,9 @@ TrainLens/
 
 ---
 
-## 3. 第一次使用
+## 主要功能
 
-### 第一步：安装 Python
-
-推荐使用：
-
-```text
-Python 3.10 或 Python 3.11
-```
-
-安装 Python 时请勾选：
-
-```text
-Add Python to PATH
-```
-
-如果没有安装 Python，可以从官网下载：
-
-```text
-https://www.python.org/downloads/
-```
-
----
-
-### 第二步：安装 TrainLens 环境
-
-解压项目后，双击运行：
-
-```text
-setup_trainlens.bat
-```
-
-它会自动完成：
-
-- 检查 Python
-- 创建 `.venv` 虚拟环境
-- 安装 Streamlit、Plotly、Pandas、NumPy、Pillow 等依赖
-
-安装完成后会看到类似提示：
-
-```text
-TrainLens setup finished.
-You can now run start_trainlens.bat
-```
-
----
-
-## 4. 启动 TrainLens
-
-以后每次使用，双击运行：
-
-```text
-start_trainlens.bat
-```
-
-正常情况下浏览器会自动打开：
-
-```text
-http://localhost:8501
-```
-
-如果浏览器没有自动打开，可以手动复制该地址到浏览器。
-
----
-
-## 5. 快速测试
-
-第一次打开 Dashboard 后，可以直接使用默认模拟训练脚本测试。
-
-侧边栏保持默认设置：
-
-```text
-Training Script: scripts/mock_train.py
-Train Directory: ./dataset/train
-Validation Directory: ./dataset/val
-Epochs: 5
-Learning Rate: 0.001
-Batch Size: 16
-Device: auto
-```
-
-点击：
-
-```text
-Start Training
-```
-
-正常现象：
-
-- 状态变为 Running
-- 进度轮盘开始增长
-- Accuracy / Loss 曲线开始更新
-- 训练结束后状态变为 Finished
-- `runs/exp_001`、`runs/exp_002` 等实验目录自动生成
-
----
-
-## 6. 主要功能
-
-### 6.1 Training Dashboard
+### Training Dashboard
 
 显示当前训练状态，包括：
 
@@ -235,7 +220,7 @@ Dataset Inspector 可以显示：
 
 ---
 
-## 7. 接入自己的训练脚本
+## 接入自己的训练脚本
 
 TrainLens 不限制你使用什么模型或框架。
 
@@ -252,7 +237,7 @@ TrainLens 不限制你使用什么模型或框架。
 
 ---
 
-### 7.1 必须支持的命令行参数
+### 必须支持的命令行参数
 
 你的训练脚本至少需要支持：
 
@@ -274,7 +259,7 @@ python train.py --train ./dataset/train --val ./dataset/val --epochs 20 --lr 0.0
 
 ---
 
-### 7.2 必须输出 metrics.jsonl
+### 必须输出 metrics.jsonl
 
 训练脚本需要每个 epoch 向 `--log` 指定的文件写入一行 JSON。
 
@@ -288,7 +273,7 @@ python train.py --train ./dataset/train --val ./dataset/val --epochs 20 --lr 0.0
 
 ---
 
-### 7.3 字段说明
+### 字段说明
 
 | 字段 | 含义 |
 |---|---|
@@ -313,7 +298,7 @@ progress 推荐使用 0 到 100，例如 50.0 表示 50%。
 
 ---
 
-### 7.4 写入 metrics 示例
+### 写入 metrics 示例
 
 ```python
 import json
@@ -362,9 +347,9 @@ examples/example_cv_train.py
 
 ---
 
-## 8. 常见问题
+## 常见问题
 
-### 8.1 双击 setup_trainlens.bat 后提示找不到 Python
+### 双击 setup_trainlens.bat 后提示找不到 Python
 
 原因：
 
@@ -377,7 +362,7 @@ examples/example_cv_train.py
 
 ---
 
-### 8.2 setup_trainlens.bat 安装依赖失败
+### setup_trainlens.bat 安装依赖失败
 
 可能原因：
 
@@ -394,7 +379,7 @@ examples/example_cv_train.py
 
 ---
 
-### 8.3 start_trainlens.bat 提示没有 .venv
+### start_trainlens.bat 提示没有 .venv
 
 原因：
 
@@ -410,7 +395,7 @@ setup_trainlens.bat
 
 ---
 
-### 8.4 浏览器打不开 http://localhost:8501
+### 浏览器打不开 http://localhost:8501
 
 可能原因：
 
@@ -426,7 +411,7 @@ setup_trainlens.bat
 
 ---
 
-### 8.5 点击 Start Training 后没有曲线
+### 点击 Start Training 后没有曲线
 
 请检查：
 
@@ -438,7 +423,7 @@ setup_trainlens.bat
 
 ---
 
-## 9. 如何清空实验记录
+## 如何清空实验记录
 
 实验记录保存在：
 
@@ -480,7 +465,7 @@ New-Item -ItemType File .\runs\.gitkeep
 
 ---
 
-## 10. 当前限制
+## 当前限制
 
 当前版本限制：
 
@@ -490,26 +475,24 @@ New-Item -ItemType File .\runs\.gitkeep
 - 暂不支持云端同步
 - 暂不支持多人协作
 - 暂不支持数据库
-- 暂未打包成 exe
 - 用户训练脚本需要遵守 CLI + JSONL 协议
 
 ---
 
-## 11. 推荐使用流程
+## 推荐使用流程
 
-普通用户：
+**普通用户（Portable EXE 模式）：**
 
 ```text
-1. 解压 TrainLens
-2. 双击 setup_trainlens.bat
-3. 双击 start_trainlens.bat
-4. 先用 scripts/mock_train.py 测试
-5. 再接入自己的 train.py
-6. 用 Dataset Inspector 检查数据集
-7. 用 Experiment History 查看历史实验
+1. 从 Release 下载 TrainLens_Portable.zip
+2. 解压，将 TrainLens 文件夹放到项目根目录
+3. 双击 TrainLens/TrainLens.exe
+4. 用 Dataset Inspector 检查数据集
+5. 点击 Start Training 开始训练
+6. 用 Experiment History 查看历史实验
 ```
 
-开发者：
+**开发者（源码 BAT 模式）：**
 
 ```text
 1. 修改 trainlens_app/app.py
@@ -523,7 +506,7 @@ New-Item -ItemType File .\runs\.gitkeep
 
 # English Guide
 
-## 1. Introduction
+## Introduction
 
 TrainLens is a local visual dashboard for computer vision training tasks.
 
@@ -546,12 +529,12 @@ TrainLens helps you:
 
 ---
 
-## 2. Project Structure
+## Project Structure
 
 ```text
 TrainLens/
-├─ setup_trainlens.bat          # First-time setup
-├─ start_trainlens.bat          # Start TrainLens
+├─ setup_trainlens.bat          # First-time setup (Source BAT Mode)
+├─ start_trainlens.bat          # Start TrainLens (Source BAT Mode)
 ├─ trainlens_app/
 │  ├─ app.py                    # Main Dashboard application
 │  └─ requirements.txt          # Python dependencies
@@ -573,7 +556,10 @@ TrainLens/
 
 ---
 
-## 3. First-Time Setup
+## First-Time Setup (Source BAT Mode)
+
+> This section is for developers who want to run TrainLens from source.
+> Normal users should use the Portable EXE mode described above.
 
 ### Step 1: Install Python
 
@@ -618,9 +604,7 @@ TrainLens setup finished.
 You can now run start_trainlens.bat
 ```
 
----
-
-## 4. Start TrainLens
+### Step 3: Start TrainLens
 
 After setup, double-click:
 
@@ -638,7 +622,7 @@ If the browser does not open, copy the address manually into your browser.
 
 ---
 
-## 5. Quick Test
+## Quick Test
 
 After opening the Dashboard for the first time, test it with the default mock training script.
 
@@ -670,9 +654,9 @@ Expected behavior:
 
 ---
 
-## 6. Main Features
+## Main Features
 
-### 6.1 Training Dashboard
+### Training Dashboard
 
 Displays:
 
@@ -689,7 +673,7 @@ Displays:
 
 ---
 
-### 6.2 Experiment History
+### Experiment History
 
 Each training run is saved as an experiment folder:
 
@@ -710,7 +694,7 @@ train.log        # Training output log
 
 ---
 
-### 6.3 Dataset Inspector
+### Dataset Inspector
 
 Used to inspect ImageFolder-style datasets.
 
@@ -751,7 +735,7 @@ Supported image formats:
 
 ---
 
-## 7. Using Your Own Training Script
+## Using Your Own Training Script
 
 TrainLens does not restrict your model or framework.
 
@@ -768,7 +752,7 @@ However, your training script must follow the TrainLens CLI and JSONL logging pr
 
 ---
 
-### 7.1 Required Command-Line Arguments
+### Required Command-Line Arguments
 
 Your training script should support at least:
 
@@ -790,7 +774,7 @@ python train.py --train ./dataset/train --val ./dataset/val --epochs 20 --lr 0.0
 
 ---
 
-### 7.2 Required metrics.jsonl Output
+### Required metrics.jsonl Output
 
 Your training script should write one JSON line to the file specified by `--log` after each epoch.
 
@@ -804,7 +788,7 @@ Each line must be a valid JSON object. This format is called JSONL.
 
 ---
 
-### 7.3 Field Definitions
+### Field Definitions
 
 | Field | Description |
 |---|---|
@@ -829,7 +813,7 @@ progress should be between 0 and 100. For example, 50.0 means 50%.
 
 ---
 
-### 7.4 Example Metric Writing Code
+### Example Metric Writing Code
 
 ```python
 import json
@@ -878,9 +862,9 @@ examples/example_cv_train.py
 
 ---
 
-## 8. FAQ
+## FAQ
 
-### 8.1 setup_trainlens.bat says Python was not found
+### setup_trainlens.bat says Python was not found
 
 Reason:
 
@@ -893,7 +877,7 @@ Install Python 3.10 or 3.11 and check Add Python to PATH.
 
 ---
 
-### 8.2 setup_trainlens.bat fails to install dependencies
+### setup_trainlens.bat fails to install dependencies
 
 Possible reasons:
 
@@ -910,7 +894,7 @@ Solutions:
 
 ---
 
-### 8.3 start_trainlens.bat says .venv was not found
+### start_trainlens.bat says .venv was not found
 
 Reason:
 
@@ -926,7 +910,7 @@ setup_trainlens.bat
 
 ---
 
-### 8.4 Browser cannot open http://localhost:8501
+### Browser cannot open http://localhost:8501
 
 Possible reasons:
 
@@ -942,7 +926,7 @@ Solutions:
 
 ---
 
-### 8.5 No curves appear after clicking Start Training
+### No curves appear after clicking Start Training
 
 Check:
 
@@ -954,7 +938,7 @@ Check:
 
 ---
 
-## 9. Clear Experiment Records
+## Clear Experiment Records
 
 Experiment records are stored in:
 
@@ -996,7 +980,7 @@ New-Item -ItemType File .\runs\.gitkeep
 
 ---
 
-## 10. Current Limitations
+## Current Limitations
 
 Current limitations:
 
@@ -1006,26 +990,24 @@ Current limitations:
 - Cloud sync is not supported
 - Multi-user collaboration is not supported
 - Database storage is not supported
-- EXE packaging is not available yet
 - User training scripts must follow the CLI + JSONL protocol
 
 ---
 
-## 11. Recommended Workflow
+## Recommended Workflow
 
-For normal users:
+**For normal users (Portable EXE Mode):**
 
 ```text
-1. Extract TrainLens
-2. Double-click setup_trainlens.bat
-3. Double-click start_trainlens.bat
-4. Test with scripts/mock_train.py first
-5. Connect your own train.py
-6. Use Dataset Inspector to check your dataset
-7. Use Experiment History to review training runs
+1. Download TrainLens_Portable.zip from the Release page
+2. Extract and place the TrainLens folder in your project root
+3. Double-click TrainLens/TrainLens.exe
+4. Use Dataset Inspector to check your dataset
+5. Click Start Training to begin training
+6. Use Experiment History to review training runs
 ```
 
-For developers:
+**For developers (Source BAT Mode):**
 
 ```text
 1. Modify trainlens_app/app.py
@@ -1037,7 +1019,7 @@ For developers:
 
 ---
 
-## 12. Summary
+## Summary
 
 TrainLens does not train models for you.
 

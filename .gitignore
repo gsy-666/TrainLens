@@ -7,10 +7,13 @@ __pycache__/
 *.pyo
 *.pyd
 
+# PyInstaller build artifacts
+build/
+dist/
+
 # Node.js / VS Code extension
 node_modules/
 out/
-dist/
 *.vsix
 
 # Training runs – keep .gitkeep, ignore all run data
