@@ -506,26 +506,103 @@ New-Item -ItemType File .\runs\.gitkeep
 
 # English Guide
 
-## Introduction
+## Quick Start
 
-TrainLens is a local visual dashboard for computer vision training tasks.
+TrainLens currently supports two running modes:
 
-It does not implement training algorithms. Instead, it helps you launch, monitor, record, and inspect your training process.
+1. **Portable EXE Mode**: recommended for normal users.
+2. **Source BAT Mode**: recommended for developers.
 
-In simple terms:
+---
 
-> Your `train.py` is responsible for model training.  
-> TrainLens is responsible for launching, monitoring, and recording it.
+## Option 1: Portable EXE Mode (Recommended for Normal Users)
 
-TrainLens helps you:
+This is the recommended way to use TrainLens.
 
-- Start local training scripts
-- Read `metrics.jsonl` in real time
-- Display training progress, accuracy curves, and loss curves
-- Save experiment records automatically
-- View experiment history
-- Inspect ImageFolder-style datasets
-- Observe computer vision training more clearly
+Users do not need to understand the TrainLens source code structure. They only need to copy the `TrainLens` folder into the root directory of their computer vision project and double-click `TrainLens.exe`.
+
+TrainLens.exe can start the Dashboard without requiring users to install Python for TrainLens itself. However, running the user's `train.py` still requires a valid Python training environment in the user's project.
+
+Recommended project structure:
+
+```text
+MyCVProject/
+├─ .venv/
+│  └─ Scripts/
+│     └─ python.exe
+├─ train.py
+├─ dataset/
+│  ├─ train/
+│  │  ├─ class_1/
+│  │  └─ class_2/
+│  └─ val/
+│     ├─ class_1/
+│     └─ class_2/
+├─ TrainLens/
+│  ├─ TrainLens.exe
+│  └─ _internal/
+└─ runs/
+```
+
+**Steps:**
+
+1. Download `TrainLens_Portable.zip` from the Release page
+2. Extract and place the `TrainLens` folder in your project root (same level as `train.py`)
+3. Double-click `TrainLens/TrainLens.exe`
+4. The browser opens automatically at `http://localhost:8501`
+
+**Auto-detection:**
+
+When TrainLens.exe starts, it automatically detects:
+
+- `MyCVProject/train.py` → training script
+- `MyCVProject/dataset/train` and `dataset/val` → datasets
+- Python training environment, searched in this order:
+  1. `MyCVProject/.venv/Scripts/python.exe`
+  2. `MyCVProject/venv/Scripts/python.exe`
+  3. `MyCVProject/env/Scripts/python.exe`
+  4. `python` in system PATH
+
+If auto-detection fails, you can manually specify the Python path in the Dashboard's Advanced Settings.
+
+**Where experiment records are saved:**
+
+Experiment records are saved to `MyCVProject/runs/` (the project root), not to `MyCVProject/TrainLens/runs/`.
+
+**Advantages:**
+
+- No need to install Python just to launch the Dashboard
+- Automatically detects the Python training environment in your project
+- Can be used for multiple projects (copy the `TrainLens` folder into each project)
+- Experiment records stay in each project directory — no mix-ups
+
+---
+
+## Option 2: Source BAT Mode (Recommended for Developers)
+
+For users who need to modify the Dashboard source code, debug, or contribute to development.
+
+**Prerequisites:** Python 3.10 or 3.11 with "Add Python to PATH" checked during installation.
+
+**First-time setup:**
+
+```bash
+Double-click setup_trainlens.bat
+```
+
+This script automatically creates a `.venv` virtual environment and installs dependencies such as Streamlit, Plotly, Pandas, NumPy, and Pillow.
+
+**Start TrainLens:**
+
+```bash
+Double-click start_trainlens.bat
+```
+
+The browser opens automatically at `http://localhost:8501`.
+
+**Quick test (Source BAT Mode):**
+
+Use the default `scripts/mock_train.py` to verify everything works.
 
 ---
 
@@ -533,8 +610,8 @@ TrainLens helps you:
 
 ```text
 TrainLens/
-├─ setup_trainlens.bat          # First-time setup (Source BAT Mode)
-├─ start_trainlens.bat          # Start TrainLens (Source BAT Mode)
+├─ setup_trainlens.bat          # Source BAT Mode: first-time setup
+├─ start_trainlens.bat          # Source BAT Mode: start TrainLens
 ├─ trainlens_app/
 │  ├─ app.py                    # Main Dashboard application
 │  └─ requirements.txt          # Python dependencies
@@ -553,104 +630,6 @@ TrainLens/
 ├─ README.md
 └─ RELEASE_CHECKLIST.md
 ```
-
----
-
-## First-Time Setup (Source BAT Mode)
-
-> This section is for developers who want to run TrainLens from source.
-> Normal users should use the Portable EXE mode described above.
-
-### Step 1: Install Python
-
-Recommended version:
-
-```text
-Python 3.10 or Python 3.11
-```
-
-When installing Python, make sure to check:
-
-```text
-Add Python to PATH
-```
-
-Download Python from:
-
-```text
-https://www.python.org/downloads/
-```
-
----
-
-### Step 2: Install TrainLens Environment
-
-After extracting the project folder, double-click:
-
-```text
-setup_trainlens.bat
-```
-
-It will automatically:
-
-- Check Python
-- Create the `.venv` virtual environment
-- Install dependencies such as Streamlit, Plotly, Pandas, NumPy, and Pillow
-
-When setup is complete, you will see:
-
-```text
-TrainLens setup finished.
-You can now run start_trainlens.bat
-```
-
-### Step 3: Start TrainLens
-
-After setup, double-click:
-
-```text
-start_trainlens.bat
-```
-
-The browser should open automatically:
-
-```text
-http://localhost:8501
-```
-
-If the browser does not open, copy the address manually into your browser.
-
----
-
-## Quick Test
-
-After opening the Dashboard for the first time, test it with the default mock training script.
-
-Keep the sidebar settings as default:
-
-```text
-Training Script: scripts/mock_train.py
-Train Directory: ./dataset/train
-Validation Directory: ./dataset/val
-Epochs: 5
-Learning Rate: 0.001
-Batch Size: 16
-Device: auto
-```
-
-Click:
-
-```text
-Start Training
-```
-
-Expected behavior:
-
-- Status changes to Running
-- Progress gauge starts increasing
-- Accuracy and Loss curves start updating
-- Status becomes Finished after training ends
-- Experiment folders such as `runs/exp_001` are created automatically
 
 ---
 
