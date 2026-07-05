@@ -5,6 +5,7 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 import json
 import os
+import sys
 import subprocess
 import psutil
 import time
@@ -16,17 +17,130 @@ from PIL import Image
 
 # Page config
 st.set_page_config(
-    page_title="TrainLens Dashboard",
+    page_title="TrainLens Dashboard V1.5 Portable",
     page_icon="🚂",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Project paths
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-CONFIG_FILE = PROJECT_ROOT / "trainlens_config.json"
-LOG_FILE = PROJECT_ROOT / "runs" / "current" / "metrics.jsonl"
-RUNS_DIR = PROJECT_ROOT / "runs"
+# Detect paths: APP_ROOT (TrainLens resources) and WORKSPACE_ROOT (user project)
+def detect_paths():
+    """
+    Detect APP_ROOT and WORKSPACE_ROOT based on environment variables or runtime mode.
+
+    APP_ROOT: TrainLens tool resources (trainlens_app, scripts, examples, docs, dataset)
+    WORKSPACE_ROOT: User's CV project (train.py, dataset/, runs/, trainlens_config.json)
+    """
+    # Priority 1: Environment variables (set by trainlens_launcher.py)
+    if os.getenv('TRAINLENS_APP_ROOT'):
+        app_root = Path(os.getenv('TRAINLENS_APP_ROOT'))
+    else:
+        # Source mode: app.py is in trainlens_app/, so parent.parent is project root
+        app_root = Path(__file__).resolve().parent.parent
+
+    if os.getenv('TRAINLENS_WORKSPACE_ROOT'):
+        workspace_root = Path(os.getenv('TRAINLENS_WORKSPACE_ROOT'))
+    else:
+        # Source mode: workspace = app root
+        workspace_root = app_root
+
+    return app_root, workspace_root
+
+APP_ROOT, WORKSPACE_ROOT = detect_paths()
+
+# Config and runs are in WORKSPACE_ROOT (user project)
+CONFIG_FILE = WORKSPACE_ROOT / "trainlens_config.json"
+LOG_FILE = WORKSPACE_ROOT / "runs" / "current" / "metrics.jsonl"
+RUNS_DIR = WORKSPACE_ROOT / "runs"
+
+def resolve_default_python_interpreter(app_root, workspace_root):
+    """
+    Auto-detect Python interpreter for running user's training script.
+
+    Priority:
+    1. TRAINLENS_PYTHON environment variable
+    2. WORKSPACE_ROOT/.venv/Scripts/python.exe
+    3. WORKSPACE_ROOT/venv/Scripts/python.exe
+    4. WORKSPACE_ROOT/env/Scripts/python.exe
+    5. Source mode: APP_ROOT/.venv/Scripts/python.exe
+    6. Non-frozen mode: sys.executable (running Python interpreter)
+    7. shutil.which("python")
+    8. shutil.which("py")
+
+    Returns:
+        str: Path to python interpreter, or None if not found
+    """
+    candidates = []
+
+    # Priority 1: Environment variable
+    if os.getenv('TRAINLENS_PYTHON'):
+        candidates.append(os.getenv('TRAINLENS_PYTHON'))
+
+    # Priority 2-4: WORKSPACE_ROOT virtual environments
+    for venv_name in ['.venv', 'venv', 'env']:
+        venv_python = workspace_root / venv_name / 'Scripts' / 'python.exe'
+        if venv_python.exists():
+            candidates.append(str(venv_python))
+
+    # Priority 5: Source mode APP_ROOT/.venv
+    if app_root == workspace_root:
+        app_venv_python = app_root / '.venv' / 'Scripts' / 'python.exe'
+        if app_venv_python.exists():
+            candidates.append(str(app_venv_python))
+
+    # Priority 6: Non-frozen mode, use current Python interpreter
+    if not getattr(sys, 'frozen', False):
+        candidates.append(sys.executable)
+
+    # Priority 7-8: System PATH
+    system_python = shutil.which("python")
+    if system_python:
+        candidates.append(system_python)
+
+    py_launcher = shutil.which("py")
+    if py_launcher:
+        candidates.append(py_launcher)
+
+    # Verify each candidate
+    for candidate in candidates:
+        try:
+            result = subprocess.run(
+                [candidate, '--version'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                return candidate
+        except Exception:
+            continue
+
+    return None
+
+def is_valid_python_interpreter(path: str) -> bool:
+    """
+    Verify if a Python interpreter path is valid and executable.
+
+    Args:
+        path: Path to python.exe
+
+    Returns:
+        bool: True if valid and executable, False otherwise
+    """
+    if not path:
+        return False
+    if not Path(path).exists():
+        return False
+    try:
+        result = subprocess.run(
+            [path, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
 
 # Initialize session state
 if 'training_process' not in st.session_state:
@@ -166,21 +280,48 @@ def load_experiments():
     return pd.DataFrame()
 
 def load_config():
-    """Load saved configuration"""
+    """Load saved configuration with Python interpreter validation"""
+    saved_config = {}
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                saved_config = json.load(f)
         except Exception as e:
             st.error(f"Failed to load config: {e}")
+
+    # Default configuration with smart path detection
+    # Priority: WORKSPACE_ROOT/train.py > APP_ROOT/scripts/mock_train.py
+    default_script = 'train.py'
+    if not (WORKSPACE_ROOT / default_script).exists():
+        default_script = str(APP_ROOT / 'scripts' / 'mock_train.py')
+
+    # Priority: WORKSPACE_ROOT/dataset > APP_ROOT/dataset
+    default_train_dir = str(WORKSPACE_ROOT / 'dataset' / 'train')
+    if not Path(default_train_dir).exists():
+        default_train_dir = str(APP_ROOT / 'dataset' / 'train')
+
+    default_val_dir = str(WORKSPACE_ROOT / 'dataset' / 'val')
+    if not Path(default_val_dir).exists():
+        default_val_dir = str(APP_ROOT / 'dataset' / 'val')
+
+    # Python interpreter: use saved if valid, otherwise auto-detect
+    auto_python = resolve_default_python_interpreter(APP_ROOT, WORKSPACE_ROOT) or ''
+    saved_python = saved_config.get('python_interpreter', '').strip()
+
+    if is_valid_python_interpreter(saved_python):
+        final_python = saved_python
+    else:
+        final_python = auto_python
+
     return {
-        'script_path': 'scripts/mock_train.py',
-        'train_dir': './dataset/train',
-        'val_dir': './dataset/val',
-        'epochs': 20,
-        'lr': 0.001,
-        'batch_size': 16,
-        'device': 'auto'
+        'script_path': saved_config.get('script_path', default_script),
+        'train_dir': saved_config.get('train_dir', default_train_dir),
+        'val_dir': saved_config.get('val_dir', default_val_dir),
+        'epochs': saved_config.get('epochs', 20),
+        'lr': saved_config.get('lr', 0.001),
+        'batch_size': saved_config.get('batch_size', 16),
+        'device': saved_config.get('device', 'auto'),
+        'python_interpreter': final_python
     }
 
 def save_config(config):
@@ -211,6 +352,24 @@ def is_training_running():
 def start_training(config):
     """Start training process"""
     try:
+        # Validate Python interpreter
+        python_interpreter = config.get('python_interpreter', '').strip()
+        if not python_interpreter:
+            return False, "Python interpreter not detected. Please check Advanced Settings."
+
+        # Verify Python interpreter exists and is executable
+        try:
+            result = subprocess.run(
+                [python_interpreter, '--version'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode != 0:
+                return False, f"Python interpreter is not valid: {python_interpreter}"
+        except Exception as e:
+            return False, f"Python interpreter is not executable: {python_interpreter}\n{e}"
+
         # Create experiment directory
         exp_dir = create_exp_dir()
         st.session_state.current_exp_dir = str(exp_dir)
@@ -220,10 +379,10 @@ def start_training(config):
         LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
         LOG_FILE.write_text("", encoding="utf-8")
 
-        # Build command
-        script_path = PROJECT_ROOT / config['script_path']
+        # Build command - use detected Python interpreter
+        script_path = WORKSPACE_ROOT / config['script_path']
         cmd = [
-            'python',
+            python_interpreter,
             str(script_path),
             '--train', config['train_dir'],
             '--val', config['val_dir'],
@@ -250,7 +409,7 @@ def start_training(config):
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            cwd=str(PROJECT_ROOT)
+            cwd=str(WORKSPACE_ROOT)
         )
 
         st.session_state.training_process = process
@@ -394,7 +553,7 @@ def get_random_images(image_paths, n=8):
 
 
 # Main UI
-st.title("🚂 TrainLens Dashboard V1.1")
+st.title("🚂 TrainLens Dashboard V1.5 Portable")
 
 # Sidebar - Configuration
 with st.sidebar:
@@ -416,6 +575,42 @@ with st.sidebar:
 
     st.divider()
 
+    # Initialize or update Python interpreter in session state
+    config_python = config.get('python_interpreter', '')
+
+    # Initialize session state for Python interpreter if not exists
+    if 'python_interpreter_input' not in st.session_state:
+        st.session_state['python_interpreter_input'] = config_python
+    # Update if current session state is invalid but config has valid path
+    elif not is_valid_python_interpreter(st.session_state['python_interpreter_input']) and is_valid_python_interpreter(config_python):
+        st.session_state['python_interpreter_input'] = config_python
+
+    # Python Environment Display - show current state
+    current_python = st.session_state.get('python_interpreter_input', '')
+    if is_valid_python_interpreter(current_python):
+        st.success("✓ Python Environment: Ready")
+        st.caption(f"📍 {current_python}")
+    else:
+        st.error("⚠️ Python Environment: Not detected")
+        st.caption("Please configure Python interpreter in Advanced Settings below.")
+
+    # Advanced Settings (collapsed by default)
+    with st.expander("🔧 Advanced Settings", expanded=False):
+        st.caption("Only modify these settings if auto-detection fails or you need to use a specific Python environment.")
+        python_interpreter = st.text_input(
+            "Python Interpreter",
+            key="python_interpreter_input",
+            help="Path to python.exe for running training scripts. Auto-detected by default.",
+            placeholder="C:\\MyCVProject\\.venv\\Scripts\\python.exe"
+        )
+        if python_interpreter != config_python and python_interpreter:
+            if is_valid_python_interpreter(python_interpreter):
+                st.info("✓ Custom Python interpreter is valid and will be used.")
+            else:
+                st.warning("⚠️ Custom Python interpreter path may be invalid.")
+
+    st.divider()
+
     # Control buttons
     is_running = is_training_running()
 
@@ -424,7 +619,7 @@ with st.sidebar:
         if st.session_state.current_exp_dir:
             exp_name = Path(st.session_state.current_exp_dir).name
             st.info(f"Experiment: {exp_name}")
-        if st.button("Stop Training", type="primary", use_container_width=True):
+        if st.button("Stop Training", type="primary", width="stretch"):
             success, msg = stop_training()
             if success:
                 st.success(msg)
@@ -433,7 +628,10 @@ with st.sidebar:
                 st.error(msg)
     else:
         st.info("Training Idle")
-        if st.button("Start Training", type="primary", use_container_width=True):
+        if st.button("Start Training", type="primary", width="stretch"):
+            # Use current Python interpreter from session state
+            final_python = st.session_state.get('python_interpreter_input', '')
+
             new_config = {
                 'script_path': script_path,
                 'train_dir': train_dir,
@@ -441,7 +639,8 @@ with st.sidebar:
                 'epochs': epochs,
                 'lr': lr,
                 'batch_size': batch_size,
-                'device': device
+                'device': device,
+                'python_interpreter': final_python
             }
             success, msg = start_training(new_config)
             if success:
@@ -504,7 +703,7 @@ with tab1:
                 title={"text": f"Epoch {epoch} / {total_epoch}"}
             ))
             fig_gauge.update_layout(height=300, margin=dict(t=50, b=0, l=0, r=0))
-            st.plotly_chart(fig_gauge, use_container_width=True)
+            st.plotly_chart(fig_gauge, width="stretch")
 
         with col_metrics:
             col1, col2 = st.columns(2)
@@ -547,7 +746,7 @@ with tab1:
                     line=dict(color='#10b981', width=2, dash='dash')
                 ))
             fig_loss.update_layout(height=350, xaxis_title="Epoch", yaxis_title="Loss", hovermode='x unified')
-            st.plotly_chart(fig_loss, use_container_width=True)
+            st.plotly_chart(fig_loss, width="stretch")
 
         with col_acc:
             st.subheader("Accuracy Curves")
@@ -566,7 +765,7 @@ with tab1:
                     line=dict(color='#10b981', width=2, dash='dash')
                 ))
             fig_acc.update_layout(height=350, xaxis_title="Epoch", yaxis_title="Accuracy (%)", hovermode='x unified')
-            st.plotly_chart(fig_acc, use_container_width=True)
+            st.plotly_chart(fig_acc, width="stretch")
 
         st.divider()
 
@@ -579,7 +778,7 @@ with tab1:
         display_df['val_loss'] = display_df['val_loss'].apply(lambda x: f"{x:.4f}")
         display_df['best_loss'] = display_df['best_loss'].apply(lambda x: f"{x:.4f}")
         display_df['progress'] = display_df['progress'].apply(lambda x: f"{x:.1f}%")
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.dataframe(display_df, width="stretch", hide_index=True)
 
 with tab2:
     # Experiment history
@@ -609,7 +808,7 @@ with tab2:
 
         display_exp = display_exp.drop('duration_seconds', axis=1)
 
-        st.dataframe(display_exp, use_container_width=True, hide_index=True)
+        st.dataframe(display_exp, width="stretch", hide_index=True)
 
         # Detail view
         st.divider()
@@ -718,7 +917,7 @@ with tab3:
                 })
 
             class_df = pd.DataFrame(class_data)
-            st.dataframe(class_df, use_container_width=True, hide_index=True)
+            st.dataframe(class_df, width="stretch", hide_index=True)
 
             st.divider()
 
@@ -745,7 +944,7 @@ with tab3:
                 height=400,
                 hovermode='x unified'
             )
-            st.plotly_chart(fig_dist, use_container_width=True)
+            st.plotly_chart(fig_dist, width="stretch")
 
             st.divider()
 
@@ -768,7 +967,7 @@ with tab3:
                             img = Image.open(img_path)
                             # Get class name from parent directory
                             class_name = Path(img_path).parent.name
-                            st.image(img, caption=f"{class_name}", use_container_width=True)
+                            st.image(img, caption=f"{class_name}", width="stretch")
                         except Exception as e:
                             st.error(f"Failed to load image: {e}")
             else:

@@ -33,6 +33,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo Setting Python interpreter path...
+set "TRAINLENS_PYTHON=%~dp0.venv\Scripts\python.exe"
+
 echo Starting Streamlit dashboard...
 echo Open in browser: http://localhost:8501
 echo.
