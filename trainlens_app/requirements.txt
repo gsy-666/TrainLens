@@ -4,4 +4,3 @@ streamlit>=1.28.0
 plotly>=5.17.0
 psutil>=5.9.0
 pillow>=10.0.0
-streamlit-drawable-canvas>=0.9.0
