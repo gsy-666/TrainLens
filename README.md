@@ -762,6 +762,52 @@ Supported image formats:
 
 ---
 
+## Image Annotator 🆕
+
+Draw bounding boxes directly on images for object detection labeling. Outputs YOLO format.
+
+### Controls
+
+| Action | How |
+|--------|-----|
+| Draw box | 🖱️ Click + drag |
+| Switch image | ⌨️ **A** prev / **D** next (preloaded, instant) |
+| Delete box | Click to select → **Delete** key |
+| Undo | **Right-click** |
+| Save | 💾 Save Annotations button |
+| Jump | 📁 Dropdown selector |
+| Class | Dropdown (new boxes auto-assigned to active class) |
+
+### Output
+
+Saved to `annotations/` directory, YOLO normalized format:
+
+```text
+annotations/
+├─ classes.txt          # Class list (one per line)
+├─ cat_0.txt            # Annotations for cat_0.jpg
+├─ dog_1.txt            # Annotations for dog_1.jpg
+└─ visualizations/      # Auto-generated preview images
+    └─ gallery/         # Previews grouped by class
+```
+
+---
+
+## Browse Annotations 🆕
+
+Three-column layout to review all labeled results.
+
+| Left | Center | Right |
+|------|--------|-------|
+| 📋 Image list | 🖼️ Annotated preview | 📊 Class Stats |
+| Click to switch | A/D to switch | Box counts per class |
+
+- 🖼️ **Generate All Visualizations**: batch-create preview images
+- 📊 **Gallery**: browse by class
+- 📦 **Export Summary**: total annotation stats
+
+---
+
 ## Using Your Own Training Script
 
 TrainLens does not restrict your model or framework.
@@ -1011,7 +1057,6 @@ New-Item -ItemType File .\runs\.gitkeep
 
 Current limitations:
 
-- Object detection bbox visualization is not supported yet
 - Segmentation mask visualization is not supported yet
 - YOLO, ResNet, UNet, and other algorithms are not built in
 - Cloud sync is not supported
@@ -1030,8 +1075,10 @@ Current limitations:
 2. Extract and place the TrainLens folder in your project root
 3. Double-click TrainLens/TrainLens.exe
 4. Use Dataset Inspector to check your dataset
-5. Click Start Training to begin training
-6. Use Experiment History to review training runs
+5. Use Image Annotator to label images (optional)
+6. Use Browse Annotations to review labels
+7. Click Start Training to begin training
+8. Use Experiment History to review training runs
 ```
 
 **For developers (Source BAT Mode):**
