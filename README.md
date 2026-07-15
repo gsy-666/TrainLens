@@ -129,9 +129,10 @@ TrainLens/
 │  ├─ TRAIN_SCRIPT_PROTOCOL.md  # 训练脚本协议说明
 │  └─ DATASET_INSPECTOR.md      # 数据集检查说明
 ├─ dataset/
-│  ├─ README_dataset_format.txt # 数据集格式说明
-│  ├─ train/                    # 示例训练集
-│  └─ val/                      # 示例验证集
+│  ├─ README_dataset_format.txt
+│  ├─ train/                    # 训练集
+│  └─ val/                      # 验证集
+├─ annotations/                 # 标注输出目录（自动生成）
 ├─ runs/                        # 实验记录目录
 ├─ README.md
 └─ RELEASE_CHECKLIST.md
@@ -469,13 +470,58 @@ New-Item -ItemType File .\runs\.gitkeep
 
 当前版本限制：
 
-- 暂不支持目标检测 bbox 可视化
 - 暂不支持分割 mask 可视化
 - 暂不内置 YOLO、ResNet、UNet 等算法
 - 暂不支持云端同步
 - 暂不支持多人协作
 - 暂不支持数据库
 - 用户训练脚本需要遵守 CLI + JSONL 协议
+
+---
+
+## Image Annotator（图片标注器）🆕
+
+直接在图片上拖拽画框，支持目标检测标注，YOLO 格式输出。
+
+### 操作方式
+
+| 操作 | 方式 |
+|------|------|
+| 画框 | 🖱️ 拖拽 |
+| 切图 | ⌨️ **A** 上一张 / **D** 下一张（预加载，秒切） |
+| 删框 | 点击选中 → **Delete** |
+| 撤销 | **右键** |
+| 保存 | 💾 Save Annotations 按钮 |
+| 跳转 | 📁 下拉框选图 |
+| 类别 | 下拉框切换（新画的框自动归入当前类） |
+
+### 标注格式
+
+保存到 `annotations/` 目录，YOLO 归一化格式：
+
+```text
+annotations/
+├─ classes.txt          # 类别列表（一行一个）
+├─ cat_0.txt            # cat_0.jpg 的标注
+├─ dog_1.txt            # dog_1.jpg 的标注
+└─ visualizations/      # 自动生成的可视化预览图
+    └─ gallery/         # 按类别分类的预览图
+```
+
+---
+
+## Browse Annotations（标注浏览）🆕
+
+三栏布局查看所有标注结果。
+
+| 左列 | 中列 | 右列 |
+|------|------|------|
+| 📋 图片列表 | 🖼️ 带框预览图 | 📊 Class Stats |
+| 点击秒切 | A/D 秒切 | 各类别框数统计 |
+
+- 🖼️ **Generate All Visualizations**：一键批量生成标注预览图
+- 📊 **Gallery**：按 Class 分类浏览
+- 📦 **Export Summary**：标注总数统计
 
 ---
 
@@ -488,8 +534,10 @@ New-Item -ItemType File .\runs\.gitkeep
 2. 解压，将 TrainLens 文件夹放到项目根目录
 3. 双击 TrainLens/TrainLens.exe
 4. 用 Dataset Inspector 检查数据集
-5. 点击 Start Training 开始训练
-6. 用 Experiment History 查看历史实验
+5. 用 Image Annotator 标注图片（可选）
+6. 用 Browse Annotations 查看标注结果
+7. 点击 Start Training 开始训练
+8. 用 Experiment History 查看历史实验
 ```
 
 **开发者（源码 BAT 模式）：**
