@@ -53,7 +53,7 @@ fi
 
 # ---- 4. 自检 ----
 echo "[4/5] 自检..."
-"$VENV_PY" -c "import fastapi, uvicorn, onnxruntime, ultralytics; from PyQt6 import QtCore; import anylabeling.app_info; print('  核心依赖 OK, X-AnyLabeling', anylabeling.app_info.__version__)"
+"$VENV_PY" -c "import fastapi, uvicorn, onnxruntime, ultralytics; from PyQt6 import QtCore; import anylabeling.app_info; print('  核心依赖 OK, TrainLens core', anylabeling.app_info.__version__)"
 
 # ---- 5. 完成 ----
 echo "[5/5] 环境就绪！"

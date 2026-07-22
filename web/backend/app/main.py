@@ -1,4 +1,4 @@
-"""X-AnyLabeling Web UI backend (FastAPI).
+"""TrainLens Web UI backend (FastAPI).
 
 Reuses the desktop codebase (anylabeling.*) for label file IO and
 auto-labeling model inference. Run from web/backend/:
@@ -9,8 +9,6 @@ When web/frontend/dist exists (npm run build), it is served at / so the
 whole app runs from this single process/port.
 """
 
-import os
-import site
 import sys
 from pathlib import Path
 
@@ -22,36 +20,6 @@ from fastapi.staticfiles import StaticFiles
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
-
-
-def _fix_qt_dll_path():
-    """Ensure PyQt6's own Qt6 DLLs win the Windows DLL search.
-
-    Venvs created from Anaconda Python inherit Anaconda's Library\\bin on
-    PATH, whose Qt6*.dll shadow PyQt6's and break QtCore import with
-    "DLL load failed". Prepending PyQt6's Qt6\\bin to the DLL search path
-    (and PATH) fixes loading regardless of the base interpreter.
-    """
-    if os.name != "nt":
-        return
-    candidates = []
-    try:
-        candidates += [Path(p) for p in site.getsitepackages()]
-    except Exception:
-        pass
-    candidates.append(Path(sys.prefix) / "Lib" / "site-packages")
-    for sp in candidates:
-        qt_bin = sp / "PyQt6" / "Qt6" / "bin"
-        if qt_bin.is_dir():
-            try:
-                os.add_dll_directory(str(qt_bin))
-            except (OSError, AttributeError):
-                pass
-            os.environ["PATH"] = str(qt_bin) + os.pathsep + os.environ.get("PATH", "")
-            return
-
-
-_fix_qt_dll_path()
 
 from .routers import (  # noqa: E402
     dataset,
@@ -68,7 +36,7 @@ from .routers import (  # noqa: E402
 )
 from .auth import TokenAuthMiddleware  # noqa: E402
 
-app = FastAPI(title="X-AnyLabeling Web", version="0.1.0")
+app = FastAPI(title="TrainLens", version="1.0.0")
 
 app.add_middleware(TokenAuthMiddleware)
 

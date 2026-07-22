@@ -63,7 +63,7 @@ if exist "%~dp0web\frontend\dist\index.html" (
 
 rem ---- 4. 自检 ----
 echo [4/5] 自检...
-"%PY%" -c "import fastapi, uvicorn, onnxruntime, ultralytics; from PyQt6 import QtCore; import anylabeling.app_info; print('  核心依赖 OK, X-AnyLabeling', anylabeling.app_info.__version__)"
+"%PY%" -c "import fastapi, uvicorn, onnxruntime, ultralytics; from PyQt6 import QtCore; import anylabeling.app_info; print('  核心依赖 OK, TrainLens core', anylabeling.app_info.__version__)"
 if errorlevel 1 (
   echo.
   echo [错误] Qt 库加载失败。如果 .venv 是用 Anaconda 的 Python 创建的，
