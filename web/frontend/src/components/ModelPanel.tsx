@@ -69,6 +69,8 @@ export default function ModelPanel() {
       const d = await api.getModels();
       setModels(d.models);
       setLoaded(d.loaded);
+      // keep the dropdown in sync with the actually loaded model
+      if (d.loaded) setSelectedCfg(d.loaded.config_file);
     } catch (e) {
       console.error(e);
     }
@@ -277,6 +279,7 @@ export default function ModelPanel() {
         }))}
         disabled={loading}
         size="small"
+        dropdownMatchSelectWidth={360}
       />
 
       <Space style={{ marginTop: 8, width: "100%" }} size={4}>
@@ -387,7 +390,7 @@ export default function ModelPanel() {
         <div style={{ marginTop: 8 }}>
           <Input
             size="small"
-            placeholder="文本提示（Grounding 类模型，可留空）"
+            placeholder="文本提示：多类用英文句号分隔，如 person. car."
             value={textPrompt}
             onChange={(e) => setTextPrompt(e.target.value)}
             style={{ marginBottom: 6 }}
