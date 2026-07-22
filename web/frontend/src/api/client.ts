@@ -585,4 +585,39 @@ export async function prepareDataset(
   return r.data;
 }
 
+// ---- device + quickstart --------------------------------------------------------
+
+export interface DeviceInfo {
+  cuda_available: boolean;
+  gpus: { index: number; name: string; memory_mb: number }[];
+  recommended: string;
+}
+
+export async function getDevice(): Promise<DeviceInfo> {
+  const r = await api.get("/system/device");
+  return r.data;
+}
+
+export interface QuickstartPayload {
+  task_type?: string;
+  dataset_ratio?: number;
+  epochs?: number;
+  model?: string;
+  device?: string;
+}
+
+export interface QuickstartResult {
+  task_type: string;
+  device: string;
+  model: string;
+  dataset_dir: string;
+  dataset_info: string;
+  job: TrainingJobInfo;
+}
+
+export async function quickstart(payload: QuickstartPayload): Promise<QuickstartResult> {
+  const r = await api.post("/training/quickstart", payload);
+  return r.data;
+}
+
 export type { LabelFileData };
