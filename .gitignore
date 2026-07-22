@@ -1,39 +1,17 @@
-# Python virtual environments
+# Python
 .venv/
-venv/
-env/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# PyInstaller build artifacts
-build/
-dist/
-
-# Node.js / VS Code extension
+# Node / frontend
 node_modules/
-out/
-*.vsix
+*.tsbuildinfo
 
-# Training runs – keep .gitkeep, ignore all run data
-runs/*
-!runs/.gitkeep
+# 注意：web/frontend/dist 是提交进仓库的预构建产物，请勿忽略
 
-# Config with local paths
-trainlens_config.json
-test_metrics.jsonl
-*.log
-
-# IDE / editor
-.vscode/
-.idea/
-
-# OS junk
+# OS / editor
 .DS_Store
 Thumbs.db
-*.tmp
-*.bak
-
-# Release test packaging
-TrainLens_Release_Test/
+.vscode/
+.idea/

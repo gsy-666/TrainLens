@@ -1,0 +1,46 @@
+# ============================================================
+#  TrainLens (X-AnyLabeling Web) - Python 依赖
+#  Python >= 3.11
+#  GPU 用户：把 onnxruntime 换成 onnxruntime-gpu，二选一
+# ============================================================
+
+# ---- X-AnyLabeling 核心 ----
+natsort>=8.1.0
+pillow>=7.1.2
+pillow-heif>=0.18.0
+opencv-contrib-python-headless>=4.7.0.72
+PyQt6>=6.6.0
+qimage2ndarray>=1.10.0
+lapx>=0.5.5
+tqdm>=4.64.0
+scipy>=1.4.1
+PyYAML
+importlib_metadata
+json_repair
+jsonlines
+markdown
+openai
+socksio>=1.0.0
+psutil
+pyclipper
+six
+shapely
+termcolor
+tokenizers
+requests
+darkdetect>=0.8.0
+matplotlib
+
+# ---- ONNX 推理（CPU 默认；GPU 请改装 onnxruntime-gpu）----
+numpy>=2.0.0
+onnx>=1.15.0
+onnxruntime>=1.15.0
+# onnxruntime-gpu>=1.18.1   # CUDA 12.x 用户取消注释，并注释掉上一行
+
+# ---- Web 后端 ----
+fastapi>=0.110.0
+uvicorn>=0.29.0
+python-multipart>=0.0.9
+
+# ---- 训练中心 ----
+ultralytics
