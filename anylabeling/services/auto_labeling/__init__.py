@@ -1,431 +1,127 @@
+"""Auto-labeling model registry (baseline snapshot + UI category exports).
+
+This file provides the model categorization lists required by
+the labeling view UI (batch processing, conf/iou settings, etc.)
+while restricting to the baseline model set.
+
+Only models that have corresponding service implementations and
+config files in configs/auto_labeling/ are listed here.
+"""
+
+# ── Custom models (have dedicated service implementations) ──────────────
 _CUSTOM_MODELS = [
-    "remote_server",
-    "florence2",
-    "doclayout_yolo",
-    "open_vision",
     "segment_anything",
-    "segment_anything_2",
     "segment_anything_3",
-    "segment_anything_2_video",
-    "sam_med2d",
-    "sam_hq",
     "yolov5",
     "yolov6",
     "yolov7",
     "yolov8",
-    "yolov8_seg",
     "yolox",
+    "yolov5_cls",
     "yolov5_resnet",
     "yolov6_face",
-    "scrfd",
     "rtdetr",
-    "yolo_nas",
-    "yolox_dwpose",
-    "clrnet",
-    "ppocr_v4",
-    "yolov5_sam",
-    "yolov8_sam2",
-    "efficientvit_sam",
-    "yolov5_track",
-    "damo_yolo",
-    "yolov5_sahi",
-    "yolov8_sahi",
-    "yolo11_sahi",
-    "yolo26_sahi",
-    "grounding_sam",
-    "grounding_sam2",
-    "grounding_dino",
-    "grounding_dino_api",
-    "yolov5_obb",
-    "gold_yolo",
-    "ram",
-    "yolov5_seg",
-    "yolov5_ram",
-    "yolov8_pose",
-    "pulc_attribute",
-    "internimage_cls",
-    "edge_sam",
-    "yolov5_cls",
-    "yolov8_cls",
-    "yolov8_obb",
-    "yolov5_car_plate",
-    "rtmdet_pose",
-    "yolov9",
-    "yolow",
-    "yolov10",
-    "rmbg",
-    "depth_anything",
-    "depth_anything_v2",
-    "yolow_ram",
-    "rtdetrv2",
-    "yolov8_det_track",
-    "yolov8_seg_track",
-    "yolov8_obb_track",
-    "yolov8_pose_track",
-    "yolo11",
-    "yolo11_cls",
-    "yolo11_obb",
-    "yolo11_seg",
-    "yolo11_pose",
-    "yolo11_det_track",
-    "yolo11_seg_track",
-    "yolo11_obb_track",
-    "yolo11_pose_track",
-    "upn",
-    "geco",
-    "rfdetr",
-    "rfdetr_seg",
-    "dfine",
-    "yolo12",
-    "yolo26",
-    "yolo26_seg",
-    "yolo26_obb",
-    "yolo26_pose",
-    "yolo26_det_track",
-    "yolo26_seg_track",
-    "yolo26_obb_track",
-    "yolo26_pose_track",
-    "u_rtdetr",
-    "yoloe",
-    "ppocr_v5",
-    "ppocr_v6",
-    "deimv2",
 ]
 
 
-# --- set_cache_auto_label ---
+# ── set_cache_auto_label ────────────────────────────────────────────────
 _CACHED_AUTO_LABELING_MODELS = [
-    "segment_anything_2_video",
-    "remote_server",
+    # None of the baseline models require special caching
 ]
 
 
-# --- set_auto_labeling_marks ---
+# ── set_auto_labeling_marks ─────────────────────────────────────────────
 _AUTO_LABELING_MARKS_MODELS = [
-    "remote_server",
     "segment_anything",
-    "segment_anything_2",
     "segment_anything_3",
-    "segment_anything_2_video",
-    "sam_med2d",
-    "sam_hq",
-    "yolov5_sam",
-    "efficientvit_sam",
-    "grounding_sam",
-    "grounding_sam2",
-    "open_vision",
-    "edge_sam",
-    "florence2",
-    "geco",
-    "yoloe",
 ]
 
 
-# --- set_mask_fineness ---
+# ── set_mask_fineness ───────────────────────────────────────────────────
 _AUTO_LABELING_MASK_FINENESS_MODELS = [
-    "remote_server",
     "segment_anything",
-    "segment_anything_2",
-    "segment_anything_3",
-    "segment_anything_2_video",
-    "sam_med2d",
-    "sam_hq",
-    "yolov5_sam",
-    "efficientvit_sam",
-    "grounding_sam",
-    "grounding_sam2",
-    "edge_sam",
-    "rfdetr_seg",
 ]
 
 
-# --- set_cropping_mode ---
+# ── set_cropping_mode ───────────────────────────────────────────────────
 _AUTO_LABELING_CROPPING_MODE_MODELS = [
-    "remote_server",
     "segment_anything",
-    "segment_anything_2",
-    "segment_anything_2_video",
-    "sam_med2d",
-    "sam_hq",
-    "yolov5_sam",
-    "efficientvit_sam",
-    "grounding_sam",
-    "grounding_sam2",
-    "edge_sam",
 ]
 
 
-# --- skip detection step ---
-_SKIP_DET_MODELS = [
-    "ppocr_v4",
-    "ppocr_v5",
-    "ppocr_v6",
-]
+# ── skip detection step ─────────────────────────────────────────────────
+_SKIP_DET_MODELS = []
 
 
-# --- skip_prediction_on_new_marks ---
-_SKIP_PREDICTION_ON_NEW_MARKS_MODELS = [
-    "yoloe",
-]
+# ── skip_prediction_on_new_marks ────────────────────────────────────────
+_SKIP_PREDICTION_ON_NEW_MARKS_MODELS = []
 
 
-# --- set_auto_labeling_api_token ---
-_AUTO_LABELING_API_TOKEN_MODELS = [
-    "remote_server",
-    "grounding_dino_api",
-]
+# ── set_auto_labeling_api_token ─────────────────────────────────────────
+_AUTO_LABELING_API_TOKEN_MODELS = []
 
 
-# --- set_auto_labeling_reset_tracker ---
-_AUTO_LABELING_RESET_TRACKER_MODELS = [
-    "remote_server",
-    "yolov5_det_track",
-    "yolov8_det_track",
-    "yolov8_obb_track",
-    "yolov8_seg_track",
-    "yolov8_pose_track",
-    "segment_anything_2_video",
-    "yolo11_det_track",
-    "yolo11_seg_track",
-    "yolo11_obb_track",
-    "yolo11_pose_track",
-    "yolo26_det_track",
-    "yolo26_seg_track",
-    "yolo26_obb_track",
-    "yolo26_pose_track",
-]
+# ── set_auto_labeling_reset_tracker ─────────────────────────────────────
+_AUTO_LABELING_RESET_TRACKER_MODELS = []
 
 
-# --- set_auto_labeling_conf ---
+# ── set_auto_labeling_conf ──────────────────────────────────────────────
 _AUTO_LABELING_CONF_MODELS = [
-    "remote_server",
-    "upn",
-    "segment_anything_3",
-    "damo_yolo",
-    "gold_yolo",
-    "grounding_dino",
-    "grounding_dino_api",
     "rtdetr",
-    "rtdetrv2",
-    "yolo_nas",
-    "yolov5_obb",
-    "yolov5_seg",
-    "yolov5_det_track",
     "yolov5",
-    "yolov5_sahi",
     "yolov6",
     "yolov6_face",
-    "scrfd",
     "yolov7",
-    "yolov8_sam2",
-    "yolov8_obb",
-    "yolov8_pose",
-    "yolov8_seg",
-    "yolov8_det_track",
-    "yolov8_seg_track",
-    "yolov8_obb_track",
-    "yolov8_pose_track",
     "yolov8",
-    "yolov8_sahi",
-    "yolov9",
-    "yolov10",
-    "yolo11",
-    "yolo11_sahi",
-    "yolo11_obb",
-    "yolo11_seg",
-    "yolo11_pose",
-    "yolo11_det_track",
-    "yolo11_seg_track",
-    "yolo11_obb_track",
-    "yolo11_pose_track",
-    "yolow",
     "yolox",
-    "doclayout_yolo",
-    "rfdetr",
-    "rfdetr_seg",
-    "deimv2",
-    "dfine",
-    "yolo12",
-    "yolo26",
-    "yolo26_sahi",
-    "yolo26_seg",
-    "yolo26_obb",
-    "yolo26_pose",
-    "yolo26_det_track",
-    "yolo26_seg_track",
-    "yolo26_obb_track",
-    "yolo26_pose_track",
-    "u_rtdetr",
-    "yoloe",
-    "grounding_sam2",
 ]
 
 
-# --- set_auto_labeling_iou ---
+# ── set_auto_labeling_iou ───────────────────────────────────────────────
 _AUTO_LABELING_IOU_MODELS = [
-    "remote_server",
-    "upn",
-    "damo_yolo",
-    "gold_yolo",
-    "yolo_nas",
-    "yolov5_obb",
-    "yolov5_seg",
-    "yolov5_det_track",
     "yolov5",
-    "yolov5_sahi",
     "yolov6",
-    "scrfd",
     "yolov7",
-    "yolov8_sam2",
-    "yolov8_obb",
-    "yolov8_pose",
-    "yolov8_seg",
-    "yolov8_det_track",
-    "yolov8_seg_track",
-    "yolov8_obb_track",
-    "yolov8_pose_track",
     "yolov8",
-    "yolov8_sahi",
-    "yolov9",
-    "yolo11",
-    "yolo11_sahi",
-    "yolo11_obb",
-    "yolo11_seg",
-    "yolo11_pose",
-    "yolo11_det_track",
-    "yolo11_seg_track",
-    "yolo11_obb_track",
-    "yolo11_pose_track",
     "yolox",
-    "yolo12",
-    "yolo26_det_track",
-    "yolo26_seg_track",
-    "yolo26_obb_track",
-    "yolo26_pose_track",
-    "yoloe",
 ]
 
 
-# --- set_auto_labeling_preserve_existing_annotations_state ---
+# ── set_auto_labeling_preserve_existing_annotations_state ───────────────
 _AUTO_LABELING_PRESERVE_EXISTING_ANNOTATIONS_STATE_MODELS = [
-    "remote_server",
-    "damo_yolo",
-    "gold_yolo",
-    "grounding_dino",
-    "grounding_dino_api",
     "rtdetr",
-    "rtdetrv2",
-    "yolo_nas",
-    "yolov5_obb",
-    "yolov5_seg",
-    "yolov5_det_track",
     "yolov5",
-    "yolov5_sahi",
     "yolov6",
-    "scrfd",
+    "yolov6_face",
     "yolov7",
-    "yolov8_sam2",
-    "yolov8_obb",
-    "yolov8_pose",
-    "yolov8_seg",
-    "yolov8_det_track",
-    "yolov8_seg_track",
-    "yolov8_obb_track",
-    "yolov8_pose_track",
     "yolov8",
-    "yolov8_sahi",
-    "yolov9",
-    "yolov10",
-    "yolo11",
-    "yolo11_sahi",
-    "yolo11_obb",
-    "yolo11_seg",
-    "yolo11_pose",
-    "yolo11_det_track",
-    "yolo11_seg_track",
-    "yolo11_obb_track",
-    "yolo11_pose_track",
-    "yolow",
     "yolox",
-    "doclayout_yolo",
-    "florence2",
-    "rfdetr",
-    "rfdetr_seg",
-    "segment_anything_3",
-    "deimv2",
-    "dfine",
-    "yolo12",
-    "yolo26",
-    "yolo26_sahi",
-    "yolo26_seg",
-    "yolo26_obb",
-    "yolo26_pose",
-    "yolo26_det_track",
-    "yolo26_seg_track",
-    "yolo26_obb_track",
-    "yolo26_pose_track",
-    "u_rtdetr",
-    "yoloe",
-    "segment_anything_2_video",
 ]
 
 
-# --- set_auto_labeling_prompt ---
-_AUTO_LABELING_PROMPT_MODELS = [
-    "segment_anything_2_video",
-]
+# ── set_auto_labeling_prompt ────────────────────────────────────────────
+_AUTO_LABELING_PROMPT_MODELS = []
 
 
-# --- on_next_files_changed ---
+# ── on_next_files_changed ───────────────────────────────────────────────
 _ON_NEXT_FILES_CHANGED_MODELS = [
     "segment_anything",
-    "segment_anything_2",
-    "sam_med2d",
-    "sam_hq",
-    "yolov5_sam",
-    "yolov8_sam2",
-    "efficientvit_sam",
-    "grounding_sam",
-    "grounding_sam2",
-    "edge_sam",
-    "geco",
 ]
 
 
-# --- update_thumbnail_display ---
-_THUMBNAIL_RENDER_MODELS = {
-    "rmbg": ("x-anylabeling-matting", ".png"),
-    "depth_anything": ("x-anylabeling-depth", ".png"),
-    "depth_anything_v2": ("x-anylabeling-depth", ".png"),
-}
+# ── update_thumbnail_display ────────────────────────────────────────────
+_THUMBNAIL_RENDER_MODELS = {}
 
 
-# --- batch_processing_invalid_models ---
+# ── batch_processing_invalid_models ─────────────────────────────────────
 _BATCH_PROCESSING_INVALID_MODELS = [
     "segment_anything",
-    "segment_anything_2",
-    "sam_med2d",
-    "sam_hq",
-    "efficientvit_sam",
-    "edge_sam",
-    "open_vision",
-    "geco",
 ]
 
 
-# --- batch_processing_text_prompt_models ---
-_BATCH_PROCESSING_TEXT_PROMPT_MODELS = [
-    "remote_server",
-    "grounding_dino",
-    "grounding_sam",
-    "grounding_sam2",
-    "segment_anything_3",
-    "yoloe",
-]
+# ── batch_processing_text_prompt_models ─────────────────────────────────
+_BATCH_PROCESSING_TEXT_PROMPT_MODELS = []
 
 
-# --- batch_processing_video_models ---
-_BATCH_PROCESSING_VIDEO_MODELS = [
-    "segment_anything_2_video",
-    # "remote_server",
-]
+# ── batch_processing_video_models ───────────────────────────────────────
+_BATCH_PROCESSING_VIDEO_MODELS = []
