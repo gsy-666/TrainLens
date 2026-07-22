@@ -215,13 +215,15 @@ export async function predictBatch(
   images: string[],
   preserveExisting: boolean,
   conf?: number,
-  iou?: number
+  iou?: number,
+  textPrompt?: string
 ): Promise<void> {
   await api.post("/predict/batch", {
     images,
     preserve_existing: preserveExisting,
     conf: conf ?? null,
     iou: iou ?? null,
+    text_prompt: textPrompt || null,
   });
 }
 
