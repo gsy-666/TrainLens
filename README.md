@@ -1,5 +1,9 @@
 # TrainLens
 
+<p>
+  <img src="web/frontend/public/logo.png" alt="TrainLens" width="200" />
+</p>
+
 AI 图像标注 + 训练的 Web 工作台：React 前端 + FastAPI 后端，浏览器完成 **标注 → AI 辅助 → 数据集 → 训练** 全流程。支持本机使用和云服务器远程使用。
 
 ![标注效果](web/frontend/public/annotation-preview.jpg)
