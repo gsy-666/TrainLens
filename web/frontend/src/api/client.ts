@@ -145,6 +145,9 @@ export interface LoadedModelInfo {
   type: string;
   config_file: string;
   supports_marks?: boolean;
+  output_modes?: string[];
+  default_output_mode?: string;
+  widgets?: string[];
 }
 
 export interface ModelStatus {
@@ -169,6 +172,10 @@ export async function loadModel(configFile: string): Promise<void> {
 
 export async function unloadModel(): Promise<void> {
   await api.post("/models/unload");
+}
+
+export async function setOutputMode(mode: string): Promise<void> {
+  await api.post("/models/output_mode", { mode });
 }
 
 export async function getModelStatus(): Promise<ModelStatus> {
