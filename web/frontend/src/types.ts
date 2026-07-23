@@ -47,6 +47,7 @@ export interface LabelFileData {
 export interface ImageInfo {
   filename: string;
   has_label: boolean;
+  shape_count: number | null; // null = no label file
 }
 
 export interface OpenDirResponse {
